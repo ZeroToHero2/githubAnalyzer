@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css"
+        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+
+    <!-- Fontawesome CSS -->
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.3/css/all.css"
+        integrity="sha384-UHRtZLI+pbxtHCWp1t77Bi1L4ZtiqrqD80Kn4Z8NTSRyMA2Fd33n5dQ8lWUE00s/" crossorigin="anonymous">
+
+    <link href="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/css/bootstrap-combined.no-icons.min.css"
+        rel="stylesheet">
+    <link href="//netdna.bootstrapcdn.com/font-awesome/3.2.1/css/font-awesome.css" rel="stylesheet">
+    <!-- Datatable -->
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.20/css/jquery.dataTables.css">
+
+    <style>
+        .usersTable {
+            width: 100%;
+            margin: 0 auto;
+            clear: both;
+            border-collapse: collapse;
+            table-layout: fixed;
+            word-wrap: break-word;
+        }
+
+        .searchBoxDiv {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-left: 80px;
+            margin-right: 80px;
+        }
+    </style>
+</head>
+
+<body>
+    <header class="d-flex justify-content-center py-3">
+        <ul class="nav nav-pills">
+            <li class="nav-item"><a href="../" aria-current="page">Home</a></li>
+            <li class="nav-item"><a href="../fetchDataFromGithub" class="nav-link active" class="nav-link">Find
+                    Candidates</a></li>
+            <li class="nav-item"><a href="../listedCandidates" class="nav-link">Listed Candidates</a></li>
+
+        </ul>
+    </header>
+
+    <div class="jumbotron text-center">
+        <h1>Find Talented Candidates From Github</h1>
+        <p>You can search them with respect to their names</p>
+        <div class="searchBoxDiv" class="input-group" class="row">
+            <form action="" method="get" class="input-group rounded">
+                <input type="search" name="query" class="form-control rounded" placeholder="Search Candidate"
+                    aria-label="Search Candidate" aria-describedby="search-addon" autocomplete="off"
+                    value='{{ query }}' />
+                <button type="button" class="btn btn-dark">
+                    <i class="fas fa-search"></i>
+                </button>
+            </form>
+        </div>
+    </div>
+
+
+
+    {% if users is not None %}
+    <div class="usersTable">
+        <table id="usersTable" class="table dt-responsive" cellspacing="0" width="95%">
+            <thead>
+                <tr>
+                    <th scope="col" style="width: 35%">Profile Avatar</th>
+                    <th scope="col">Name</th>
+                    <th scope="col">Most Used Language</th>
+                    <th scope="col">Repositories Count</th>
+                    <th scope="col">Earned Star Count</th>
+                    <th scope="col">Forks Earned Count</th>
+                    <th scope="col"></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in users %}
+                <tr>
+                    <th scope="row">
+                        <img class="userProfilePicture" src={{user.avatarUrl}} style="width: 13vh;" />
+                    </th>
+                    <td>
+                        <p>{{user.name}}</p>
+                    </td>
+                    <td>
+                        <p>{{user.mostUsedLanguage}}</p>
+                    </td>
+                    <td>
+                        <p>{{user.repositoriesCount}}</p>
+                    </td>
+                    <td>
+                        <p>{{user.stargazerCount}}</p>
+                    </td>
+                    <td>
+                        <p>{{user.forkCount}}</p>
+                    </td>
+                    <td>
+                        <a href="http://www.github.com/{{user.userName}}" target="_blank">
+                            <button type="button" class="btn btn-info">
+                                Github Account
+                            </button>
+                        </a>
+                        <div class="div" style="height: 5px"></div>
+                        <button type="button" class="btn btn-success" id="submit" class="userData" value="{{user}}">Add
+                            to List</button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+
+    <!-- Insert data to database -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+    <script>
+        $(document).on('click', '#submit', function (e) {
+            let data = $(this).val(); //string
+            data = JSON.parse(data.replace(/'/gi, '"')); //replace to avoid errors
+
+            let cookie = document.cookie
+            let csrfToken = cookie.substring(cookie.indexOf('=') + 1)
+
+            $.ajax(
+                {
+                    type: 'POST',
+                    url: '{% url "saveCandidate" %}',
+                    data: data,
+                    headers:
+                    {
+                        'X-CSRFToken': csrfToken
+                    },
+                    success: function (res) {
+                        alert(res);
+                    }
+                })
+        })
+    </script>
+
+    <!-- Datatable -->
+    <script src="http://code.jquery.com/jquery-2.0.3.min.js"></script>
+    <script type="text/javascript" charset="utf8"
+        src="https://cdn.datatables.net/1.10.20/js/jquery.dataTables.js"></script>
+    <script>
+        $(document).ready(function () {
+            $('#usersTable').DataTable({
+                "order": [[4, 'desc']], // order by star count
+                "bLengthChange": false,
+                "pageLength": 5,
+                "responsive": true
+            });
+        });
+    </script>
+
+    <!-- Bootstrap -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p"
+        crossorigin="anonymous"></script>
+</body>
