@@ -1,6 +1,7 @@
 # githubAnalyzer
-Built for Apziva Ignite Program
-When I started this project, I had no prior knowledge of both Python and Django. Also, this project was completed in a limited time constraints (1.5 days).
+Built for Apziva Ignite Program.
+When I started this project, I had no prior knowledge of both Python and Django. 
+Also, this project was completed in a limited time constraints (1.5 days).
 
 
 ## Goal(s)
